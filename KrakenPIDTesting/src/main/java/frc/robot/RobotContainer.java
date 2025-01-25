@@ -84,7 +84,11 @@ public class RobotContainer {
       .onFalse(new InstantCommand(() -> motorSubsystem.stopMotor(), motorSubsystem));
 
     new JoystickButton(joystick, 5)
-      .onTrue(new InstantCommand(() -> motorSubsystem.goToIncrementalPositionMotionMagic(10), motorSubsystem))
+      .onTrue(new InstantCommand(() -> motorSubsystem.goToIncrementalPositionMotionMagicDutyCycle(10), motorSubsystem))
+      .onFalse(new InstantCommand(() -> motorSubsystem.stopMotor(), motorSubsystem));
+    
+    new JoystickButton(joystick, 6)
+      .onTrue(new InstantCommand(() -> motorSubsystem.goToIncrementalPositionMotionMagicVoltage(20), motorSubsystem))
       .onFalse(new InstantCommand(() -> motorSubsystem.stopMotor(), motorSubsystem));
   }
 

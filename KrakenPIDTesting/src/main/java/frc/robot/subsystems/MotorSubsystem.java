@@ -68,7 +68,7 @@ public class MotorSubsystem extends SubsystemBase {
     motor.setControl(positionVoltage.withPosition(finalPosition));
   }
 
-  public void goToIncrementalPositionMotionMagic(double position) {
+  public void goToIncrementalPositionMotionMagicDutyCycle(double position) {
     double finalPosition = getEncoder() + position;
     MotionMagicDutyCycle motMagDutyCycle = new MotionMagicDutyCycle(0);
     TalonFXConfiguration config = new TalonFXConfiguration();
@@ -87,6 +87,27 @@ public class MotorSubsystem extends SubsystemBase {
 
     motMagDutyCycle.Slot = 0;
     motor.setControl(motMagDutyCycle.withPosition(finalPosition));
+  }
+
+  public void goToIncrementalPositionMotionMagicVoltage(double position) {
+    double finalPosition = getEncoder() + position;
+    MotionMagicVoltage motMagVoltage = new MotionMagicVoltage(0);
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    config.Slot0.kS = 0.24; // add 0.24 V to overcome friction
+    config.Slot0.kV = 0.12; // apply 12 V for a target velocity of 100 rps
+    //PID on Position
+    config.Slot0.kP = 0.4;
+    config.Slot0.kI = 0.0;
+    config.Slot0.kD = 0.06;
+
+    config.MotionMagic.MotionMagicCruiseVelocity = 50;
+    config.MotionMagic.MotionMagicAcceleration = 100;
+    config.MotionMagic.MotionMagicJerk = 1000;
+
+    motor.getConfigurator().apply(config, 0.050);
+
+    motMagVoltage.Slot = 0;
+    motor.setControl(motMagVoltage.withPosition(finalPosition));
   }
 
   public void runWithPower(double power) {
