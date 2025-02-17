@@ -49,10 +49,149 @@ import edu.wpi.first.units.measure.Voltage;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+  // TODO: OIConstants
+  public static final class OIConstants {
+    public static final int driverControllerPort = 0;
+
+    public static final int bblPort = 4;
+    public static final int bbrPort = 3;
+
+    public static final int driverInterfaceSwitchButton = 1;
+
+    public static final int robotCentricButton = 5; // XBOX L1 button
+
+    public static final ControllerDeviceType driverInterfaceType = ControllerDeviceType.XBOX_ONEDRIVE;
+
+    public static final int CALIBRATION_JOYSTICK_SLIDER_AXLE = 3;
+
+    public static enum ControllerDeviceType {
+      LOGITECH,
+      PS5,
+      XBOX, // RightJ F/B, LeftJ L/R, L2/R2 - rotation
+      XBOX_ONEDRIVE // RIghtJ F/B/L/R, LeftJ - rotation
+    }
+
+    public static enum ControllerDevice {
+      DRIVESTICK(
+          0, // Port Number
+          ControllerDeviceType.LOGITECH,
+          0.02, // deadband X
+          0.02, // deadband Y
+          0.02, // deadband Omega
+          true, // cubeControllerLeft
+          true // cubeControllerRight
+      ),
+
+      // DRIVESTICK1,2,3 are used only for GPM calibration
+      DRIVESTICK1(
+          1, // Port Number
+          ControllerDeviceType.LOGITECH,
+          0.02, // deadband X
+          0.02, // deadband Y
+          0.02, // deadband Omega
+          true, // cubeControllerLeft
+          true // cubeControllerRight
+      ),
+
+      DRIVESTICK2(
+          2, // Port Number
+          ControllerDeviceType.LOGITECH,
+          0.02, // deadband X
+          0.02, // deadband Y
+          0.02, // deadband Omega
+          true, // cubeControllerLeft
+          true // cubeControllerRight
+      ),
+
+      DRIVESTICK3(
+          3, // Port Number
+          ControllerDeviceType.LOGITECH,
+          0.02, // deadband X
+          0.02, // deadband Y
+          0.02, // deadband Omega
+          true, // cubeControllerLeft
+          true // cubeControllerRight
+      ),
+
+      TURNSTICK( // Controls the rotation of the swervebot
+          2, // Port Number
+          ControllerDeviceType.LOGITECH,
+          0.02, // deadband X
+          0.02, // deadband Y
+          0.02, // deadband Omega
+          true, // cubeControllerLeft
+          true // cubeControllerRight
+      ),
+
+      XBOX_CONTROLLER(
+          5, // Port Number for Xbox controller
+          ControllerDeviceType.XBOX,
+          0.03, // deadband X for Xbox
+          0.03, // deadband Y for Xbox //ALL DEADBAND FOR XBOX IS PLACEHOLDER
+          0.03, // deadband Omega for Xbox
+          false, // No cube controller configuration for Xbox yet
+          false),
+
+      XBOX_CONTROLLER_GPM(
+          4, // Port Number for Xbox controller
+          ControllerDeviceType.XBOX,
+          0.03, // deadband X for Xbox
+          0.03, // deadband Y for Xbox //ALL DEADBAND FOR XBOX IS PLACEHOLDER
+          0.03, // deadband Omega for Xbox
+          false, // No cube controller configuration for Xbox yet
+          false);
+
+      private ControllerDeviceType controllerDeviceType;
+      private int portNumber;
+      private double deadbandX;
+      private double deadbandY;
+      private double deadbandOmega;
+      private boolean cubeControllerLeftStick;
+      private boolean cubeControllerRightStick;
+
+      ControllerDevice(int pn, ControllerDeviceType cdt, double dx, double dy, double dm, boolean ccL,
+          boolean ccR) {
+        this.portNumber = pn;
+        this.controllerDeviceType = cdt;
+        this.deadbandX = dx;
+        this.deadbandY = dy;
+        this.deadbandOmega = dm;
+        this.cubeControllerLeftStick = ccL;
+        this.cubeControllerRightStick = ccR;
+      }
+
+      public ControllerDeviceType getControllerDeviceType() {
+        return controllerDeviceType;
+      }
+
+      public int getPortNumber() {
+        return portNumber;
+      }
+
+      public double getDeadbandX() {
+        return deadbandX;
+      }
+
+      public double getDeadbandY() {
+        return deadbandY;
+      }
+
+      public double getDeadbandOmega() {
+        return deadbandOmega;
+      }
+
+      public boolean isCubeControllerLeftStick() {
+        return cubeControllerLeftStick;
+      }
+
+      public boolean isCubeControllerRightStick() {
+        return cubeControllerRightStick;
+      }
+    }
+
   }
 
+  // TODO: SwerveConstants
   public static class SwerveConstants {
     public static class TunerConstants {
       public static class PIDConstants {
@@ -67,8 +206,8 @@ public final class Constants {
         public static final double steerGainsKA = 0;
 
         private static final Slot0Configs steerGains = new Slot0Configs()
-            .withKP(steerGainsKP).withKI(steerGainsKI).withKD(steerGainsKD) //  generated code has KD 0.5
-            .withKS(steerGainsKS).withKV(steerGainsKV).withKA(steerGainsKA) //  generated code has KS 0.1, KV as
+            .withKP(steerGainsKP).withKI(steerGainsKI).withKD(steerGainsKD) // generated code has KD 0.5
+            .withKS(steerGainsKS).withKV(steerGainsKV).withKA(steerGainsKA) // generated code has KS 0.1, KV as
                                                                             // 1.59
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
 
@@ -118,7 +257,8 @@ public final class Constants {
       // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
       // This may need to be tuned to your individual robot
       private static final double kCoupleRatio = 3; // the old value was 3.5714285714285716
-      // private static final double kCoupleRatio = 3.5714285714285716; //the old value was 3.5714285714285716
+      // private static final double kCoupleRatio = 3.5714285714285716; //the old
+      // value was 3.5714285714285716
 
       private static final double kDriveGearRatio = 5.142857142857142 * (0.13 / 5.22); // the old value was
                                                                                        // 6.122448979591837 * (1/2.09)
@@ -326,10 +466,11 @@ public final class Constants {
     }
   }
 
+  // TODO: IMUConstants
   public static class IMUConstants {
-    public static final int kPigeonId = 40; //adjust the id according to the robot (C2025 is 40)
+    public static final int kPigeonId = 40; // adjust the id according to the robot (C2025 is 40)
 
-		// Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
-		private static final Pigeon2Configuration pigeonConfigs = null;
+    // Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
+    private static final Pigeon2Configuration pigeonConfigs = null;
   }
 }
