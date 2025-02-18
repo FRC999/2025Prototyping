@@ -59,8 +59,10 @@ public class AutoSubsystem extends SubsystemBase {
 
         // Generate the trajectory
         return PathPlannerPath.fromPathPoints(pathPoints, 
-        new PathConstraints(SwerveChassis.MaxSpeed, SwerveChassis.maxAcceleration, SwerveChassis.MaxAngularRate, SwerveChassis.maxAngularAcceleration)
-        , new GoalEndState(0, endPose.getRotation()));
+        new PathConstraints(
+          SwerveChassis.MaxSpeed, SwerveChassis.maxAcceleration, 
+          SwerveChassis.MaxAngularRate, SwerveChassis.maxAngularAcceleration), 
+        new GoalEndState(0, endPose.getRotation()));
     }
 
   @Override
