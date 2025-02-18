@@ -16,8 +16,12 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.util.DriveFeedforwards;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,12 +32,15 @@ import frc.robot.Constants.SwerveConstants.TunerConstants;
 public class DriveSubsystem extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> implements Subsystem {
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(SwerveChassis.MaxSpeed * SwerveChassis.chassisLinearMoveDeadband).withRotationalDeadband(SwerveChassis.MaxAngularRate * SwerveChassis.chassisAngularMoveDeadband) // Add a 10% deadband
+      .withDeadband(SwerveChassis.MaxSpeed * SwerveChassis.chassisLinearMoveDeadband)
+      .withRotationalDeadband(SwerveChassis.MaxAngularRate * SwerveChassis.chassisAngularMoveDeadband) // Add a 10%
+                                                                                                       // deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-      
+
   private double previousOmegaRotationCommand;
 
   Pigeon2 imu;
+  double trajectoryAdjustmentIMU;
 
   public static InterpolatingDoubleTreeMap chassisAngularVelocityConversion = new InterpolatingDoubleTreeMap();
 
@@ -134,14 +141,78 @@ public class DriveSubsystem extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
   }
 
   public void drive(double xVelocity_m_per_s, double yVelocity_m_per_s, double omega_rad_per_s) {
-    //System.out.println("X: " + xVelocity_m_per_s + " y: " + yVelocity_m_per_s + " o:" + omega_rad_per_s/SwerveChassis.MaxAngularRate);
-    SmartDashboard.putString("Manual Drive Command Velocities","X: " + xVelocity_m_per_s + " y: " + yVelocity_m_per_s + " o:" + omega_rad_per_s);
+    // System.out.println("X: " + xVelocity_m_per_s + " y: " + yVelocity_m_per_s + "
+    // o:" + omega_rad_per_s/SwerveChassis.MaxAngularRate);
+    SmartDashboard.putString("Manual Drive Command Velocities",
+        "X: " + xVelocity_m_per_s + " y: " + yVelocity_m_per_s + " o:" + omega_rad_per_s);
     this.setControl(
-      drive.withVelocityX(xVelocity_m_per_s)
-        .withVelocityY(yVelocity_m_per_s)
-        .withRotationalRate(omega_rad_per_s)
-    );
+        drive.withVelocityX(xVelocity_m_per_s)
+            .withVelocityY(yVelocity_m_per_s)
+            .withRotationalRate(omega_rad_per_s));
     previousOmegaRotationCommand = omega_rad_per_s / SwerveChassis.MaxAngularRate;
+  }
+
+  public double setYawForTrajectory(double y) {
+    trajectoryAdjustmentIMU = this.getPose().getRotation().getDegrees() - y;
+
+    // alex test
+    System.out.println("---- Trajectory AdjustmentIMU: " + trajectoryAdjustmentIMU
+        + " CP: " + this.getPose().getRotation().getDegrees() + " A: " + y);
+
+    return y; // our own setYaw that returns old angle
+  }
+
+  /**
+   * Field Centric Pose of the chassis
+   * We get it from odometry, rather than sensors. That means commands that use it
+   * must ensure that
+   * odometry was properly updated.
+   */
+  public Pose2d getPose() {
+    return this.getState().Pose;
+  }
+
+  /**
+   * Set odometry to a specified field-centric Pose2d
+   * You may need to do so for the trajectory driving, if you want the robot to
+   * assume being at the
+   * start of the trajectory.
+   * Be aware that on-going odometry updates use IMU. So, your odometry yaw may
+   * change incorrectly
+   * later if the current yaw is not reset properly on the IMU first.
+   * 
+   * Note that the pose is from Blue Alliance perspective
+   */
+  public void resetOdometry(Pose2d pose) {
+    this.resetPose(pose);
+  }
+
+  public void restoreYawAfterTrajectory() {
+    System.out.println("Final pose: " + this.getPose());
+    System.out.println(
+        "Restoring original IMU after trajectory "
+            + (this.getPose().getRotation().getDegrees() + trajectoryAdjustmentIMU));
+    this.resetPose(
+        new Pose2d(0, 0,
+            Rotation2d.fromDegrees(this.getPose().getRotation().getDegrees() + trajectoryAdjustmentIMU)));
+  }
+
+  public ChassisSpeeds getChassisSpeeds() {
+    ChassisSpeeds ctrSpeed = this.getState().Speeds;
+    // ctrSpeed.omegaRadiansPerSecond =
+    // getChassisAngularVelocityConversion(ctrSpeed.omegaRadiansPerSecond);
+    return ctrSpeed;
+  }
+
+  public void driveWithChassisSpeeds(ChassisSpeeds speeds, DriveFeedforwards driveFeedforwards) {
+    drive(
+        speeds.vxMetersPerSecond,
+        speeds.vyMetersPerSecond,
+        getChassisAngularVelocityConversion(speeds.omegaRadiansPerSecond));
+  }
+
+  public static double getChassisAngularVelocityConversion(double velocity) {
+    return chassisAngularVelocityConversion.get(velocity);
   }
 
   @Override
