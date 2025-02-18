@@ -215,6 +215,10 @@ public class DriveSubsystem extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
     return chassisAngularVelocityConversion.get(velocity);
   }
 
+  public void stopRobot(){
+    drive(0,0,0);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

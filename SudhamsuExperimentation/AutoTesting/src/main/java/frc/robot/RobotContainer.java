@@ -9,12 +9,16 @@ import frc.robot.Constants.OIConstants.ControllerDevice;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveManuallyCommand;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.RunTrajectorySequenceRobotAtStartPoint;
+import frc.robot.commands.StopRobot;
+import frc.robot.subsystems.AutoSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -28,6 +32,7 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
   public static final DriveSubsystem driveSubsystem = new DriveSubsystem();
+  public static final AutoSubsystem autoSubsystem = new AutoSubsystem();
 
 
   public static XboxController xboxController;
@@ -44,6 +49,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     configureDriverInterface();
+    
 
     driveSubsystem.setDefaultCommand(
       new DriveManuallyCommand(
@@ -69,6 +75,13 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+
+    try {
+      testAuto();
+    }
+    catch (Exception e) {
+       System.out.println("test auto error: " + e);
+    }
   }
 
   private void configureDriverInterface() {
@@ -91,6 +104,12 @@ public class RobotContainer {
     private double getDriverOmegaAxis() {
       //return -xboxController.getLeftStickOmega();
       return -xboxController.getLeftX();
+    }
+
+    private void testAuto() throws Exception {
+      new JoystickButton(xboxController, 1)
+        .onTrue(new RunTrajectorySequenceRobotAtStartPoint("OneMeter90"))
+        .onFalse(new StopRobot());
     }
 
   /**

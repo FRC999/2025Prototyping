@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveConstants.SwerveChassis;
 
 public class AutoSubsystem extends SubsystemBase {
-  HashMap<String, PathPlannerPath> trajPaths;
+  public HashMap<String, PathPlannerPath> trajPaths;
   ArrayList<Translation2d> testWayPoints;
 
   /** Creates a new AutoSubsystem. */
