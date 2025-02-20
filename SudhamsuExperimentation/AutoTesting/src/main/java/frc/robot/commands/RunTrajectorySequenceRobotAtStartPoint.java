@@ -40,7 +40,7 @@ public class RunTrajectorySequenceRobotAtStartPoint extends SequentialCommandGro
       double maxAcceleration, double maxAngularAcceleration) throws Exception {
     this(
         TrajectoryHelpers.replanTrajectory(
-          RobotContainer.autoSubsystem.trajPaths.get("Test"),
+          RobotContainer.autoSubsystem.trajPaths.get(trajectoryName),
             maxVelocity, maxAngularVelocity, maxAcceleration, maxAngularAcceleration),
         trajectoryName
 
@@ -51,7 +51,7 @@ public class RunTrajectorySequenceRobotAtStartPoint extends SequentialCommandGro
   public RunTrajectorySequenceRobotAtStartPoint(String trajectoryName) throws Exception {
 
     this(
-        RobotContainer.autoSubsystem.trajPaths.get("Test"), trajectoryName);
+        RobotContainer.autoSubsystem.trajPaths.get(trajectoryName), trajectoryName);
     System.out.println("initalized trajectory: " + trajectoryName);
   }
 

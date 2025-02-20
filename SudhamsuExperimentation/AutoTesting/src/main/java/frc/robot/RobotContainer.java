@@ -108,7 +108,7 @@ public class RobotContainer {
 
     private void testAuto() throws Exception {
       new JoystickButton(xboxController, 1)
-        .onTrue(new RunTrajectorySequenceRobotAtStartPoint("OneMeter90"))
+        .onTrue(new RunTrajectorySequenceRobotAtStartPoint("Test"))
         .onFalse(new StopRobot());
     }
 
